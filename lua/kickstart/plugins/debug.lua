@@ -13,6 +13,7 @@ return {
   dependencies = {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
+    'nvim-neotest/nvim-nio',
 
     -- Installs the debug adapters for you
     'williamboman/mason.nvim',
@@ -51,6 +52,7 @@ return {
     vim.keymap.set('n', '<leader>B', function()
       dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
     end, { desc = 'Debug: Set Breakpoint' })
+    vim.keymap.set('n', '<leader>db', dap.clear_breakpoints, { desc = 'Debug: Clear Breakpoints' })
 
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
