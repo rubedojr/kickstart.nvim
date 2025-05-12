@@ -145,6 +145,12 @@ vim.opt.splitbelow = true
 vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+-- Set indent
+vim.o.tabstop = 4 -- A Tab character looks like 4 spaces
+vim.o.expandtab = true -- Pressing tab will insert spaces
+vim.o.softtabstop = 4 -- Number of spaces inserted instead of a tab character
+vim.o.shiftwidth = 4 -- Number of spaces inserted when indenting.
+
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
@@ -153,6 +159,33 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+
+-- Change completion behavior to not insert or auto select any completion alternative
+vim.o.completeopt = 'menuone,popup,noselect'
+
+-- Virtual Line for diagnostics but only on current line instead of all lines.
+-- vim.diagnostic.config {
+--   virtual_lines = {
+--     current_line = true,
+--   },
+-- }
+
+-- Set mark on each command line prompt in terminal
+vim.api.nvim_create_autocmd('TermOpen', {
+  command = 'setlocal signcolumn=auto',
+})
+local ns = vim.api.nvim_create_namespace 'my.terminal.prompt'
+vim.api.nvim_create_autocmd('TermRequest', {
+  callback = function(args)
+    if string.match(args.data.sequence, '^\027]133;A') then
+      local lnum = args.data.cursor[1]
+      vim.api.nvim_buf_set_extmark(args.buf, ns, lnum - 1, 0, {
+        sign_text = '▶',
+        sign_hl_group = 'SpecialChar',
+      })
+    end
+  end,
+})
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -208,7 +241,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    vim.hl.on_yank()
   end,
 })
 
@@ -361,6 +394,16 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
+        defaults = {
+          layout_config = {
+            horizontal = {
+              height = 0.99,
+              -- preview_cutoff = 120,
+              -- prompt_position = "bottom",
+              width = 0.99,
+            },
+          },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -856,6 +899,18 @@ require('lazy').setup({
     -- Optional dependencies
     -- dependencies = { { "echasnovski/mini.icons", opts = {} } },
     dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if prefer nvim-web-devicons
+  },
+  {
+    'nvim-neorg/neorg',
+    lazy = false, -- Disable lazy loading as some `lazy.nvim` distributions set `lazy = true` by default
+    version = '*', -- Pin Neorg to the latest stable release
+    opts = {
+      load = {
+        ['core.defaults'] = {},
+        ['core.concealer'] = {},
+        ['core.dirman'] = {},
+      },
+    },
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
