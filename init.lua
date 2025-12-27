@@ -163,6 +163,9 @@ vim.opt.scrolloff = 10
 -- Change completion behavior to not insert or auto select any completion alternative
 vim.o.completeopt = 'menuone,popup,noselect'
 
+-- Show confirmation menu when certain commands fail. e.g. q, w, e ...
+vim.o.confirm = true
+
 -- Virtual Line for diagnostics but only on current line instead of all lines.
 -- vim.diagnostic.config {
 --   virtual_lines = {
@@ -190,14 +193,14 @@ vim.api.nvim_create_autocmd('TermRequest', {
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
-vim.keymap.set('n', '<C-s>', '<cmd>w<CR>', { desc = 'Save buffer to file' })
-vim.keymap.set('i', '<C-s>', '<cmd>w<CR>', { desc = 'Save buffer to file' })
-vim.keymap.set('n', '<C-S>', '<cmd>wall<CR>', { desc = 'Save all modified buffers' })
-vim.keymap.set('i', '<C-S>', '<cmd>wall<CR>', { desc = 'Save all modified buffers' })
+vim.keymap.set('n', '<C-s>', '<Cmd>w<CR>', { desc = 'Save buffer to file' })
+vim.keymap.set('i', '<C-s>', '<Cmd>w<CR>', { desc = 'Save buffer to file' })
+vim.keymap.set('n', '<C-S-s>', '<Cmd>wall<CR>', { desc = 'Save all modified buffers' })
+vim.keymap.set('i', '<C-S-s>', '<Cmd>wall<CR>', { desc = 'Save all modified buffers' })
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 -- vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
@@ -227,6 +230,14 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Delete current buffer
+vim.keymap.set('n', '<C-x>', '<Cmd>bdelete<CR>', { desc = 'Delete buffer' })
+
+-- Exit vim unless unsaved modified buffers exist.
+-- This config assumes option 'confirm' is set
+-- which will prompt for action on unsaved modified buffer.
+vim.keymap.set('n', '<C-S-X>', '<Cmd>qall<CR>', { desc = 'Exit vim, confirm for unsaved buffer' })
 
 -- Custom keymaps
 require('custom.plugins.keymaps').setup()
@@ -667,13 +678,16 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        go = { 'goimports' },
+        -- go = { 'goimports' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'dprint', 'prettierd', 'prettier' } },
+        javascript = {
+          stop_after_first = true,
+          formatters = { 'dprint', 'prettierd', 'prettier' },
+        },
       },
     },
   },
